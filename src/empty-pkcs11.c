@@ -211,11 +211,19 @@ CK_INTERFACE empty_pkcs11_3_1_interface =
 };
 
 
+static CK_BBOOL IsInitialized = CK_FALSE; // mv to top
+
 CK_DEFINE_FUNCTION(CK_RV, C_Initialize)(CK_VOID_PTR pInitArgs)
 {
-	UNUSED(pInitArgs);
+    if (IsInitialized) {
+        return CKR_CRYPTOKI_ALREADY_INITIALIZED;
+    }
 
-	return CKR_FUNCTION_NOT_SUPPORTED;
+    UNUSED(pInitArgs);
+
+    IsInitialized = CK_TRUE;
+
+    return CKR_OK;
 }
 
 
