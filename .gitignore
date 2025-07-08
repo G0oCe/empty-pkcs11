@@ -10,10 +10,11 @@ Debug/
 Release/
 ipch/
 .vs/
-/build/android/libs
-/build/ios/build
+/arch/build/android/libs
+/arch/build/ios/build
 /build/ios/*.a
 /build/linux/*.so
 /build/macos/*.dylib
 /build/windows/*.dll
 /.idea
+/arch
