@@ -21,7 +21,8 @@
 
 
 #include "empty-pkcs11.h"
-
+#include "utils.h"
+#include "pkcs11_config.h"
 
 CK_FUNCTION_LIST empty_pkcs11_2_40_functions = 
 {
@@ -310,11 +311,29 @@ CK_DEFINE_FUNCTION(CK_RV, C_Finalize)(CK_VOID_PTR pReserved)
 }
 
 
+
 CK_DEFINE_FUNCTION(CK_RV, C_GetInfo)(CK_INFO_PTR pInfo)
 {
-	UNUSED(pInfo);
+    if (CK_FALSE == IsInitialized)
+        return CKR_CRYPTOKI_NOT_INITIALIZED;
 
-	return CKR_FUNCTION_NOT_SUPPORTED;
+    if (NULL == pInfo)
+        return CKR_ARGUMENTS_BAD;
+
+    // Используем макросы из конфига
+    pInfo->cryptokiVersion.major = CRYPTOKI_VERSION_MAJOR;
+    pInfo->cryptokiVersion.minor = CRYPTOKI_VERSION_MINOR;
+
+    // Используем вспомогательную функцию
+    fill_padded_string(pInfo->manufacturerID, LIBRARY_MANUFACTURER_ID, sizeof(pInfo->manufacturerID));
+    fill_padded_string(pInfo->libraryDescription, LIBRARY_DESCRIPTION, sizeof(pInfo->libraryDescription));
+
+    pInfo->flags = 0; // Флаги обычно не меняются так часто
+
+    pInfo->libraryVersion.major = LIBRARY_VERSION_MAJOR;
+    pInfo->libraryVersion.minor = LIBRARY_VERSION_MINOR;
+
+    return CKR_OK;
 }
 
 
