@@ -263,9 +263,50 @@ CK_DEFINE_FUNCTION(CK_RV, C_Initialize)(CK_VOID_PTR pInitArgs)
 
 CK_DEFINE_FUNCTION(CK_RV, C_Finalize)(CK_VOID_PTR pReserved)
 {
-	UNUSED(pReserved);
+    if (CK_FALSE == IsInitialized) {
+        return CKR_CRYPTOKI_NOT_INITIALIZED;
+    }
 
-	return CKR_FUNCTION_NOT_SUPPORTED;
+    // 1. Строгая проверка аргумента
+    if (pReserved != NULL_PTR) {
+        return CKR_ARGUMENTS_BAD;
+    }
+
+    // Блокируем мьютекс в последний раз, чтобы безопасно всё очистить
+    //if (g_GlobalLock) {
+    //    g_MutexFuncs.LockMutex(g_GlobalLock);
+    //}
+
+    // 2. Закрываем все открытые сессии (концептуально)
+
+    // 3. Освобождаем системные ресурсы (например, PC/SC)
+    // if (g_PcscContext) {
+    //     SCardReleaseContext(g_PcscContext);
+    //     g_PcscContext = NULL;
+    // }
+
+    // 4. Освобождаем память, выделенную под список слотов
+    // if (g_SlotList) {
+    //     free(g_SlotList);
+    // * g_SlotList = NULL;
+    //     g_SlotCount = 0;
+    // }
+
+    // Снимаем блокировку перед уничтожением самого мьютекса
+    //if (g_GlobalLock) {
+    //    g_MutexFuncs.UnlockMutex(g_GlobalLock);
+    //}
+
+    // 5. Уничтожаем мьютекс
+    //if (g_GlobalLock) {
+    //    g_MutexFuncs.DestroyMutex(g_GlobalLock);
+    //    g_GlobalLock = NULL;
+    //}
+
+    // Наконец, сбрасываем флаг инициализации
+    IsInitialized = CK_FALSE;
+
+    return CKR_OK;
 }
 
 
