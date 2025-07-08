@@ -219,7 +219,41 @@ CK_DEFINE_FUNCTION(CK_RV, C_Initialize)(CK_VOID_PTR pInitArgs)
         return CKR_CRYPTOKI_ALREADY_INITIALIZED;
     }
 
-    UNUSED(pInitArgs);
+    // Проверяем аргументы, как указано в документации
+    if (pInitArgs != NULL_PTR) {
+        CK_C_INITIALIZE_ARGS_PTR args = (CK_C_INITIALIZE_ARGS_PTR)pInitArgs;
+
+        // 1. Проверка зарезервированного поля
+        if (args->pReserved != NULL_PTR) {
+            return CKR_ARGUMENTS_BAD; // Проверка на совместимость
+        }
+
+        // 2. Обработка флагов и функций для мьютексов
+        if (args->CreateMutex && args->DestroyMutex && args->LockMutex && args->UnlockMutex) {
+            // Приложение предоставило свои функции для работы с потоками.
+            // Сохраняем указатели на эти функции в глобальных переменных нашей библиотеки.
+            // g_CreateMutex = args->CreateMutex;
+            // ... и так далее для остальных функций.
+        } else if (args->flags & CKF_OS_LOCKING_OK) {
+            // Приложение само позаботится о блокировках.
+            // Наша библиотека не будет использовать мьютексы вообще.
+        } else {
+            // Приложение не предоставило функции и не указало флаг OS_LOCKING_OK.
+            // Значит, наша библиотека ДОЛЖНА сама обеспечить потокобезопасность.
+            // Инициализируем наши собственные, встроенные мьютексы (например, через pthreads или WinAPI).
+            // InitializeInternalMutexes();
+        }
+
+    } else {
+        // pInitArgs равен NULL. Это допустимый случай.
+        // Библиотека должна использовать поведение по умолчанию -
+        // то есть, сама обеспечить потокобезопасность.
+        // InitializeInternalMutexes();
+    }
+
+    // --- Здесь идет остальная логика инициализации ---
+    // Например, подключение к ридеру смарт-карт, загрузка конфигов и т.д.
+    // ...
 
     IsInitialized = CK_TRUE;
 
