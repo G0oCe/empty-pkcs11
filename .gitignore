@@ -16,3 +16,4 @@ ipch/
 /build/linux/*.so
 /build/macos/*.dylib
 /build/windows/*.dll
+/.idea
