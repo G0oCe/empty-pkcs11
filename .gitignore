@@ -19,4 +19,5 @@ ipch/
 build
 /.idea
 /arch
+/cmake-build-debug
 
