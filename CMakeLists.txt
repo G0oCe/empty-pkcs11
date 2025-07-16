@@ -7,7 +7,7 @@ project(pkcs11_driver C)
 # --- Поиск всех исходных и заголовочных файлов внутри папки src ---
 file(GLOB_RECURSE PROJECT_FILES
         "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c"
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h"
 )
 
 # --- Создание библиотеки ---
@@ -15,8 +15,8 @@ add_library(pkcs11_lib SHARED ${PROJECT_FILES})
 
 # --- Настройка путей для заголовочных файлов ---
 target_include_directories(pkcs11_lib PUBLIC
-        "${CMAKE_CURRENT_SOURCE_DIR}/src"
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/cryptoki"
+        "${CMAKE_CURRENT_SOURCE_DIR}/include"
+        "${CMAKE_CURRENT_SOURCE_DIR}/include/cryptoki"
 )
 
 # --- Настройка свойств библиотеки ---
