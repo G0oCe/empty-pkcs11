@@ -4,7 +4,7 @@
 
 #ifndef PKCS11_DRIVER_UTILS_H
 #define PKCS11_DRIVER_UTILS_H
-#include "empty-pkcs11.h" // Для типа CK_UTF8CHAR_PTR
+#include "pkcs11_entry.h" // Для типа CK_UTF8CHAR_PTR
 #include <stddef.h>  // Для типа size_t
 
 /**

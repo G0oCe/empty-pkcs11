@@ -20,7 +20,7 @@
  */
 
 
-#include "empty-pkcs11.h"
+#include "pkcs11_entry.h"
 #include "utils.h"
 #include "pkcs11_config.h"
 
