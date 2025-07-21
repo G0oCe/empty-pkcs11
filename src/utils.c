@@ -11,7 +11,7 @@
  * @param dest_size     Максимальное число символов (без учёта \0).
  * @return              Число скопированных символов.
  */
-size_t fill_padded_string_fast(
+size_t fill_padded_string(
         CK_UTF8CHAR_PTR dest,
         const char* src,
         size_t dest_size
