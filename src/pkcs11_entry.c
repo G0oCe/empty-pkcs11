@@ -23,6 +23,7 @@
 #include "pkcs11_entry.h"
 #include "utils.h"
 #include "pkcs11_config.h"
+#include "slots.h"
 
 CK_FUNCTION_LIST empty_pkcs11_2_40_functions = 
 {
@@ -256,6 +257,13 @@ CK_DEFINE_FUNCTION(CK_RV, C_Initialize)(CK_VOID_PTR pInitArgs)
     // Например, подключение к ридеру смарт-карт, загрузка конфигов и т.д.
     // ...
 
+    // Обновляем слоты при старте!
+    CK_RV rv = slots_refresh();
+    if (rv != CKR_OK) {
+        // Если не удалось получить слоты, вся инициализация провалена
+        return rv;
+    }
+
     IsInitialized = CK_TRUE;
 
     return CKR_OK;
@@ -304,7 +312,9 @@ CK_DEFINE_FUNCTION(CK_RV, C_Finalize)(CK_VOID_PTR pReserved)
     //    g_GlobalLock = NULL;
     //}
 
-    // Наконец, сбрасываем флаг инициализации
+    slots_cache_cleanup();
+
+    // сбрасываем флаг инициализации
     IsInitialized = CK_FALSE;
 
     return CKR_OK;
@@ -320,11 +330,9 @@ CK_DEFINE_FUNCTION(CK_RV, C_GetInfo)(CK_INFO_PTR pInfo)
     if (NULL == pInfo)
         return CKR_ARGUMENTS_BAD;
 
-    // Используем макросы из конфига
     pInfo->cryptokiVersion.major = CRYPTOKI_VERSION_MAJOR;
     pInfo->cryptokiVersion.minor = CRYPTOKI_VERSION_MINOR;
 
-    // Используем вспомогательную функцию
     fill_padded_string(pInfo->manufacturerID, LIBRARY_MANUFACTURER_ID, sizeof(pInfo->manufacturerID));
     fill_padded_string(pInfo->libraryDescription, LIBRARY_DESCRIPTION, sizeof(pInfo->libraryDescription));
 
@@ -348,13 +356,16 @@ CK_DEFINE_FUNCTION(CK_RV, C_GetFunctionList)(CK_FUNCTION_LIST_PTR_PTR ppFunction
 }
 
 
-CK_DEFINE_FUNCTION(CK_RV, C_GetSlotList)(CK_BBOOL tokenPresent, CK_SLOT_ID_PTR pSlotList, CK_ULONG_PTR pulCount)
-{
-	UNUSED(tokenPresent);
-	UNUSED(pSlotList);
-	UNUSED(pulCount);
+CK_DEFINE_FUNCTION(CK_RV, C_GetSlotList)(CK_BBOOL tokenPresent, CK_SLOT_ID_PTR pSlotList, CK_ULONG_PTR pulCount) {
+    if (!IsInitialized) {
+        return CKR_CRYPTOKI_NOT_INITIALIZED;
+    }
+    if (!pulCount) {
+        return CKR_ARGUMENTS_BAD;
+    }
 
-	return CKR_FUNCTION_NOT_SUPPORTED;
+    // Просто делегируем вызов нашему модулю слотов
+    return slots_get_list(tokenPresent, pSlotList, pulCount);
 }
 
 
